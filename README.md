@@ -4,6 +4,8 @@ Real-time client traffic monitoring for OpenWrt LuCI. Live per-client Rx/Tx rate
 
 ---
 
+**Official upstream repository for the OpenWrt luci-app-client-monitor package.**
+
 ## Installation
 
 ### For OpenWrt v25.12 or newer (.apk)
@@ -183,6 +185,19 @@ echo 1 > /tmp/client_monitor/.force_refresh
 
 ---
 
+## Screenshots
+
+### Core Interface Layout
+![OpenWrt LuCI Client Monitor Interface Header Area Rate Cards](header_area.png)
+
+### Advanced Client Tracking
+![OpenWrt LuCI Client Traffic Monitoring Network Bridge AP Topology Discovery](bridge_clients.png)
+
+### Mobile Responsive Layout
+![OpenWrt LuCI Per Client Bandwidth Traffic Monitoring Mobile View](mobile_view.jpg)
+
+---
+
 ## License
 
 MIT license.
@@ -192,3 +207,7 @@ MIT license.
 Report issues with:
 - OpenWrt version and hardware
 - Network topology description (bridges, APs, VLANs)
+
+## See Also
+* [luci-app-dashboard](https://github.com) - Realtime system monitoring dashboard and vnStat backup manager.
+
