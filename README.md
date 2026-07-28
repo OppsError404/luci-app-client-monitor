@@ -209,5 +209,5 @@ Report issues with:
 - Network topology description (bridges, APs, VLANs)
 
 ## See Also
-* [luci-app-dashboard](https://github.com) - Realtime system monitoring dashboard and vnStat backup manager.
+* [luci-app-dashboard]([https://github.com](https://github.com/OppsError404/luci-app-dashboard)) - Realtime system monitoring dashboard and vnStat backup manager.
 
