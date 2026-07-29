@@ -12,7 +12,7 @@ Real-time client traffic monitoring for OpenWrt LuCI. Live per-client Rx/Tx rate
 
 ```bash
 apk update && \
-wget --no-check-certificate -O /tmp/luci-app-client-monitor.apk "https://github.com/OppsError404/luci-app-client-monitor/releases/download/v1.0.0-r1/luci-app-client-monitor-1.0.0-r1.apk" && \
+wget --no-check-certificate -O /tmp/luci-app-client-monitor.apk "https://github.com/OppsError404/luci-app-client-monitor/releases/download/v1.0.0-r2/luci-app-client-monitor-1.0.0-r2.apk" && \
 apk add --allow-untrusted /tmp/luci-app-client-monitor.apk && \
 rm -f /tmp/luci-app-client-monitor.apk
 ```
@@ -21,7 +21,7 @@ rm -f /tmp/luci-app-client-monitor.apk
 
 ```bash
 opkg update && \
-wget --no-check-certificate -O /tmp/luci-app-client-monitor.ipk "https://github.com/OppsError404/luci-app-client-monitor/releases/download/v1.0.0-r1/luci-app-client-monitor_1.0.0-r1.ipk" && \
+wget --no-check-certificate -O /tmp/luci-app-client-monitor.ipk "https://github.com/OppsError404/luci-app-client-monitor/releases/download/v1.0.0-r2/luci-app-client-monitor_1.0.0-r2.ipk" && \
 opkg install /tmp/luci-app-client-monitor.ipk && \
 rm -f /tmp/luci-app-client-monitor.ipk
 ```
@@ -147,7 +147,6 @@ echo 1 > /tmp/client_monitor/.force_refresh
 | `lua` | Lua runtime (5.1 or 5.4) |
 | `luci-lib-nixio` | Filesystem, sleep, syslog |
 | `luci-lib-base` | LuCI base libraries |
-| `cgi-io` | CGI helper |
 | `libubus-lua` | ubus Lua API |
 | `libuci-lua` | UCI configuration API |
 
@@ -157,11 +156,6 @@ echo 1 > /tmp/client_monitor/.force_refresh
 |---------|-------|
 | `nftables` | Kernel bridge-family support for per-MAC counting |
 | `ip-bridge` | `bridge fdb show` for FDB table access |
-
-
-### Frontend (CDN)
-
-- Font Awesome 6.5 (icon stylesheet only)
 
 ---
 
@@ -180,7 +174,7 @@ echo 1 > /tmp/client_monitor/.force_refresh
 - The collector daemon is **on-demand only** — it starts when a browser opens the page and stops after 60 s of no polling.
 - All cache files live in `/tmp` and reset on reboot. The registry persists client identities but is rebuilt from scratch if deleted.
 - Static assets (JS/CSS) are shipped gzip-compressed and decompressed to `/tmp` at boot to minimize flash storage.
-- The `ap_monitor` script is triggered by wireless hotplug events to discover AP interfaces and write `/tmp/test/current-aps.json`.
+- The `ap_monitor` script is triggered by wireless hotplug events to discover AP interfaces and write `/tmp/client_monitor/current-aps.json`.
 - The frontend uses a short-key JSON protocol (v3.0) to minimize payload size on low-bandwidth links.
 
 ---
@@ -209,5 +203,5 @@ Report issues with:
 - Network topology description (bridges, APs, VLANs)
 
 ## See Also
-* [luci-app-dashboard]([https://github.com](https://github.com/OppsError404/luci-app-dashboard)) - Realtime system monitoring dashboard and vnStat backup manager.
+* [luci-app-dashboard](https://github.com/OppsError404/luci-app-dashboard) - Realtime system monitoring dashboard and vnStat backup manager.
 
