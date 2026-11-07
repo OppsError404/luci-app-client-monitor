@@ -1,0 +1,94 @@
+{% include('header') %}
+<meta charset="utf-8" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="/luci-static/resources/view/client_monitor/client_monitor.css" />
+<script>
+var CM_SID = "{{ ctx.authsession }}";
+function ubusCall(obj, method, params) {
+  return fetch("/ubus", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0", id: 1,
+      method: "call",
+      params: [CM_SID, obj, method, params || {}]
+    })
+  }).then(function(r) { return r.json(); }).then(function(res) {
+    if (res.result && res.result[0] === 0) return res.result[1];
+    var msg = (res.error && res.error.message) || "ubus call failed";
+    var err = new Error(msg);
+    err.transient = (msg === "Object not found" || msg === "Timeout" || msg === "Connection failed" || msg === "Permission denied");
+    throw err;
+  });
+}
+</script>
+
+<div id="crm_root">
+  <div class="crm-shell">
+    <div class="crm-inner">
+
+      <header>
+        <div class="h-left"><h1>Client Monitor</h1></div>
+        <div class="header-right">
+          <div class="controls-row">
+
+            <!-- Rate unit selector -->
+            <div class="select-mini" id="unitMini" aria-haspopup="listbox">
+              <button class="trigger" id="unitTrigger" aria-expanded="false" aria-controls="unitPanel" type="button">
+                <span id="unitLabel">MB/s</span>
+                <span class="trigger-caret"><svg viewBox="0 0 10 6" width="7" height="7" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+              <div class="dd-panel" id="unitPanel" role="listbox" aria-hidden="true" tabindex="-1">
+                <button class="opt selected" data-unit="MB/s"  role="option" type="button" aria-selected="true">MB/s</button>
+                <button class="opt"          data-unit="Mbps"  role="option" type="button" aria-selected="false">Mbps</button>
+              </div>
+            </div>
+
+            <!-- Automatic poll timing -->
+            <div class="select-mini" id="autoMini" aria-haspopup="listbox">
+              <button class="trigger" id="autoTrigger" aria-expanded="false" aria-controls="autoPanel" type="button">
+                <span class="trigger-warn" id="triggerWarn">⚠</span>
+                <span class="label">Poll</span>
+                <strong id="autoLabel">2s</strong>
+                <span class="trigger-caret"><svg viewBox="0 0 10 6" width="7" height="7" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+              <div class="dd-panel" id="autoPanel" role="listbox" aria-hidden="true" tabindex="-1" aria-labelledby="autoTrigger">
+                <button class="opt" data-val="1"  role="option" type="button" style="color:#ef4444;font-weight:600;">1s</button>
+                <button class="opt selected" data-val="2"  role="option" type="button" aria-selected="true">2s</button>
+                <button class="opt" data-val="3"  role="option" type="button">3s</button>
+                <button class="opt" data-val="5"  role="option" type="button">5s</button>
+                <button class="opt" data-val="10" role="option" type="button">10s</button>
+                <button class="opt" data-val="0"  role="option" type="button">Off</button>
+              </div>
+            </div>
+
+            <!-- Request fresh discovery data -->
+            <button id="forceRefreshBtn" title="Bypass cache and fetch fresh data" type="button">
+              <span class="refresh-icon" style="display:inline-flex;align-items:center;justify-content:center;width:10px;height:10px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>
+              Refresh
+            </button>
+
+          </div>
+          <div id="last">Last_Poll: never</div>
+        </div>
+      </header>
+
+      <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading…</div>
+      </div>
+
+      <main id="custom_status_container">
+        <div id="iface_rates_wrap"></div>
+        <div class="grid"     id="mobile_grid"></div>
+        <div class="pc-bands" id="pc_bands"></div>
+      </main>
+
+    </div>
+  </div>
+</div>
+
+<div id="poll-warn-toast">⚠ Fast polling may cause intensive CPU usage</div>
+
+<script src="/luci-static/resources/view/client_monitor/client_monitor.js"></script>
+{% include('footer') %}

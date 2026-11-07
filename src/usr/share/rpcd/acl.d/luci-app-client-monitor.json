@@ -1,0 +1,1 @@
+{"luci-app-client-monitor": {"description": "Grant access to LuCI app client-monitor", "read": {"cgi-io": ["exec"], "ubus": {"client_monitor": ["get_data"]}}, "write": {"cgi-io": ["exec"], "ubus": {"client_monitor": ["force_refresh"]}}}}

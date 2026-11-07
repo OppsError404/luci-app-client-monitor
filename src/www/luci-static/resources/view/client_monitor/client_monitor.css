@@ -1,0 +1,1685 @@
+
+
+/* Theme variables */
+#crm_root {
+  /* Base colours */
+  --accent:      #1f8ef1;
+  --success:     #28a745;
+  --warning:     #f59e0b;
+  --danger:      #ef4444;
+  --bg:          transparent;
+  --card:        transparent;
+  --glass-bg:    rgba(0, 0, 0, 0.01);
+  --glass-border: rgba(0, 0, 0, 0.12);
+  --glass-shadow: 2px 4px 16px rgba(0, 0, 0, 0.25);
+  --text:        #0b1220;
+  --muted:       #4b5563;
+  --line:        #e6e9ee;
+
+  /* Shadow presets */
+  --shadow-sm:   0 4px 12px  rgba(var(--clr-deep), 0.06);
+  --shadow-md:   0 10px 20px rgba(var(--clr-deep), 0.08);
+  --shadow-lg:   0 15px 30px rgba(var(--clr-deep), 0.12);
+
+  /* Corner sizes */
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   10px;
+
+  /* Transition defaults */
+  --anim-dur:    1000ms;
+  --anim-ease:   cubic-bezier(0.2, 0.85, 0.2, 1);
+
+  /* Outline colour */
+  --hover-outline: rgba(var(--clr-accent), 0.3);
+
+  /* Receive/transmit colours */
+  --rx-color:    #4a8cc8;
+  --tx-color:    #3caa3c;
+
+  /* RGB values let each band reuse its colour at different opacities. */
+  --clr-lan:     45, 106, 79;    /* green */
+  --clr-24:      180, 140, 60;   /* amber */
+  --clr-5:       33, 150, 243;   /* blue */
+  --clr-6:       171, 71, 188;   /* purple */
+  --clr-bridge:  99, 102, 241;   /* indigo */
+  --clr-iface:   0, 165, 165;    /* teal */
+
+  /* Shared RGB values for borders, shadows and controls */
+  --clr-black:   0, 0, 0;
+  --clr-ink:     5, 5, 5;
+  --clr-deep:    15, 23, 42;
+  --clr-abyss:   2, 6, 23;
+  --clr-mid:     107, 114, 128;
+  --clr-white:   255, 255, 255;
+  --clr-accent:  31, 142, 241;
+  --clr-go:      40, 167, 69;
+
+  font-family: Inter, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+}
+
+/* Page layout */
+#crm_root .crm-shell {
+  background: var(--bg);
+  padding: 0 0 8px;
+  margin-top: -8px;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+#crm_root .crm-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 8px;
+}
+
+/* Page header */
+#crm_root header {
+  position: relative;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 60px;
+  padding: 10px 15px;
+  background: var(--card);
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+  overflow: visible;
+}
+
+#crm_root header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+#crm_root .h-left h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--text);
+  letter-spacing: 0.1px;
+}
+
+#crm_root .header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+#crm_root .controls-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+#crm_root #last {
+  font-family: 'JetBrains Mono', monospace, inherit;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: rgba(31, 142, 241, 0.7);
+}
+
+/* Manual refresh */
+#crm_root #forceRefreshBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  background: transparent;
+  border: 1px solid rgba(var(--clr-accent), 0.40);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace, inherit;
+  font-size: 11px;
+  font-weight: 600;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: border-color 150ms ease, color 150ms ease, transform 120ms ease;
+}
+#crm_root #forceRefreshBtn:focus,
+#crm_root #forceRefreshBtn:focus-visible { outline: none; box-shadow: none; }
+#crm_root #forceRefreshBtn:hover {
+  border-color: rgba(var(--clr-accent), 0.80);
+  color: rgba(var(--clr-deep), 1);
+}
+#crm_root #forceRefreshBtn:active { transform: scale(0.97); }
+#crm_root #forceRefreshBtn .refresh-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Dropdown controls */
+#crm_root .select-mini {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: fit-content;
+  z-index: 1000;
+}
+
+/* Keep the interface selector above neighboring cards. */
+#crm_root #ifaceMini_pc,
+#crm_root #ifaceMini_mob { position: relative; }
+#crm_root .client.card-iface:hover,
+#crm_root .client.card-iface:focus-within { z-index: 50; }
+
+#crm_root .select-mini .trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 6px;
+  background: transparent;
+  border: 1px solid rgba(var(--clr-accent), 0.40);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+#crm_root .select-mini .trigger:hover,
+#crm_root .select-mini .trigger.glow { border-color: rgba(var(--clr-accent), 0.80); }
+#crm_root .select-mini .trigger:active {
+  transform: scale(1.03);
+  transition: transform 120ms ease;
+}
+
+#crm_root .select-mini .trigger .label,
+#crm_root .select-mini .trigger #autoLabel,
+#crm_root .select-mini .trigger #unitLabel {
+  font-family: 'JetBrains Mono', monospace, inherit;
+  font-size: 11px;
+  font-weight: 550;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  text-transform: none;
+  transition: color 150ms ease;
+  color: var(--text) !important;
+}
+#crm_root .select-mini .trigger:hover .label,
+#crm_root .select-mini .trigger:hover #autoLabel,
+#crm_root .select-mini .trigger:hover #unitLabel,
+#crm_root .select-mini .trigger.glow .label,
+#crm_root .select-mini .trigger.glow #autoLabel,
+#crm_root .select-mini .trigger.glow #unitLabel { color: rgba(var(--clr-deep), 1); }
+
+#crm_root .trigger-caret {
+  opacity: 0.6;
+  transition: transform 160ms ease, opacity 160ms ease;
+  flex-shrink: 0;
+  width: 7px; height: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+#crm_root .trigger-caret svg {
+  width: 100%; height: 100%;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+#crm_root .select-mini.open .trigger-caret { transform: rotate(180deg); opacity: 1; }
+
+/* Show the warning only for one-second polling. */
+#crm_root .trigger-warn {
+  display: none;
+  font-size: 11px;
+  color: var(--warning);
+  margin-right: 2px;
+  cursor: default;
+}
+
+/* Dropdown list */
+#crm_root .dd-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  padding: 4px;
+  background: #ffffff;
+  border: 1px solid rgba(var(--clr-accent), 0.30);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(var(--clr-deep), 0.12);
+  z-index: 1000;
+}
+#crm_root .select-mini.open .dd-panel { display: block; }
+
+#crm_root .dd-panel button.opt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 7px 10px;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: rgba(var(--clr-deep), 0.65);
+  font-family: 'JetBrains Mono', monospace, inherit;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  text-align: center;
+  transition: background 120ms ease, color 120ms ease;
+}
+#crm_root .dd-panel button.opt:hover {
+  background: rgba(var(--clr-deep), 0.06);
+  color: rgba(var(--clr-deep), 0.9);
+}
+#crm_root .dd-panel button.opt.selected {
+  background: rgba(var(--clr-accent), 0.16);
+  color: #1f8ef1;
+  font-weight: 700;
+  position: relative;
+}
+#crm_root .dd-panel button.opt.selected::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 20%; bottom: 20%;
+  width: 3px;
+  background: #1f8ef1;
+  border-radius: 0 3px 3px 0;
+}
+
+/* Frequency suffix in interface labels */
+#crm_root .dd-panel button.opt .freq-part,
+#crm_root .label .freq-part {
+  font-size: 0.85em;
+  opacity: 0.9;
+}
+
+/* Scrollable interface lists */
+#crm_root #ifacePanel_pc.dd-panel,
+#crm_root #ifacePanel_mob.dd-panel {
+  min-width: 100px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(128,128,128,0.3) transparent;
+}
+#crm_root #ifacePanel_pc.dd-panel::-webkit-scrollbar,
+#crm_root #ifacePanel_mob.dd-panel::-webkit-scrollbar { width: 3px; }
+#crm_root #ifacePanel_pc.dd-panel::-webkit-scrollbar-track,
+#crm_root #ifacePanel_mob.dd-panel::-webkit-scrollbar-track { background: transparent; }
+#crm_root #ifacePanel_pc.dd-panel::-webkit-scrollbar-thumb,
+#crm_root #ifacePanel_mob.dd-panel::-webkit-scrollbar-thumb {
+  background: rgba(128,128,128,0.35);
+  border-radius: 99px;
+}
+
+/* Desktop interface list */
+#crm_root #ifacePanel_pc.dd-panel { width: max-content; max-width: 260px; z-index: 10000; }
+#crm_root #ifacePanel_pc.dd-panel button.opt {
+  justify-content: flex-start;
+  color: rgba(var(--clr-deep), 0.8) !important;
+  font-size: 11px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+/* Combined entries use the interface colour. */
+#crm_root #ifacePanel_pc.dd-panel button.opt-combined {
+  color: rgba(var(--clr-iface), 0.9) !important;
+  font-style: italic;
+}
+#crm_root #ifacePanel_pc.dd-panel button.opt-combined.selected {
+  color: rgba(var(--clr-iface), 1) !important;
+}
+#crm_root #ifacePanel_pc.dd-panel button.opt-combined.selected::before {
+  background: rgba(var(--clr-iface), 1);
+}
+#crm_root #ifacePanel_pc.dd-panel button.opt-smart::after {
+  content: '✦';
+  font-size: 7px;
+  margin-left: 4px;
+  opacity: 0.5;
+  font-style: normal;
+}
+
+/* Mobile interface list */
+#crm_root #ifacePanel_mob.dd-panel { width: max-content; max-width: 160px; font-size: 9px; z-index: 10001 !important; scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.3) transparent; }
+#crm_root #ifacePanel_mob.dd-panel::-webkit-scrollbar { width: 3px; }
+#crm_root #ifacePanel_mob.dd-panel::-webkit-scrollbar-track { background: transparent; }
+#crm_root #ifacePanel_mob.dd-panel::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.35); border-radius: 99px; }
+#crm_root #ifacePanel_mob.dd-panel button.opt {
+  justify-content: flex-start;
+  font-size: 9px !important;
+  padding: 2px 5px;
+  white-space: nowrap;
+}
+/* Use the same combined-entry colours on mobile. */
+#crm_root #ifacePanel_mob.dd-panel button.opt-combined {
+  color: rgba(var(--clr-iface), 0.9) !important;
+  font-style: italic;
+}
+#crm_root #ifacePanel_mob.dd-panel button.opt-combined.selected {
+  color: rgba(var(--clr-iface), 1) !important;
+}
+#crm_root #ifacePanel_mob.dd-panel button.opt-combined.selected::before {
+  background: rgba(var(--clr-iface), 1);
+}
+#crm_root #ifacePanel_mob.dd-panel button.opt-smart::after {
+  content: '✦';
+  font-size: 7px;
+  margin-left: 4px;
+  opacity: 0.5;
+  font-style: normal;
+}
+
+/* Shared card styles */
+
+/* Wi-Fi band badges */
+#crm_root .band-title-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  flex-wrap: nowrap;
+  margin-bottom: -4px;
+  padding-bottom: 4px;
+}
+
+#crm_root .freq-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 5px 1px;
+  border-radius: 3px;
+  font-size: 0.68em;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 1;
+  line-height: 1.1;
+}
+#crm_root .freq-badge-24 { background: rgba(var(--clr-24), 0.08); border: 1px solid rgba(var(--clr-24), 0.15); color: rgba(var(--clr-24), 1); }
+#crm_root .freq-badge-5  { background: rgba(var(--clr-5), 0.08);  border: 1px solid rgba(var(--clr-5), 0.15);  color: rgba(var(--clr-5), 1); }
+#crm_root .freq-badge-6  { background: rgba(var(--clr-6), 0.08);  border: 1px solid rgba(var(--clr-6), 0.15);  color: rgba(var(--clr-6), 1); }
+
+/* SSID labels */
+#crm_root .ssid-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 1;
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+  margin-right: -3px;
+}
+#crm_root .ssid-badge-24 { background: transparent; border: 1px solid transparent; color: rgba(var(--clr-24), 1); }
+#crm_root .ssid-badge-5  { background: transparent; border: 1px solid transparent; color: rgba(var(--clr-5),  1); }
+#crm_root .ssid-badge-6  { background: transparent; border: 1px solid transparent; color: rgba(var(--clr-6),  1); }
+
+/* LAN and interface titles share sizing, but not colour. */
+#crm_root .lan-title-badge,
+#crm_root .iface-title-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 5px;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+  flex-shrink: 1;
+  background: transparent;
+  border: 1px solid transparent;
+}
+#crm_root .lan-title-badge   { color: rgba(var(--clr-lan),   0.9); }
+#crm_root .iface-title-badge { color: rgba(var(--clr-iface), 0.9); }
+
+/* Link-state indicator */
+#crm_root .iface-oper {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #9aa4b2;
+}
+#crm_root .iface-oper.up   { background: #28a745; }
+#crm_root .iface-oper.down { background: #ef4444; }
+
+/* Title text shared by both layouts */
+#crm_root .band-ssid,
+#crm_root .mobile-panel .panel-title,
+#crm_root .band-title {
+  font-weight: 650;
+  font-size: 13px;
+  color: var(--text);
+  letter-spacing: 0.3px;
+}
+#crm_root .band-ssid { line-height: 1; }
+
+/* Panel footer */
+#crm_root .panel-foot {
+  display: flex;
+  padding: 0 10px;
+  border-top: 1px solid var(--line);
+  margin-top: 2px;
+}
+
+#crm_root .total-text {
+  font-family: monospace;
+  font-size: 10px;
+  color: var(--muted);
+  opacity: 0.9;
+  margin: 3px 0 -9px;
+}
+
+#crm_root .panel-count {
+  color: var(--muted);
+  font-size: 11px;
+  min-width: 28px;
+  text-align: right;
+  padding-right: 10px;
+}
+
+/* No-client placeholder */
+#crm_root .empty {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+}
+
+#crm_root .empty-panel { opacity: 0.55; font-style: italic; }
+#crm_root .empty-panel .panel-title,
+#crm_root .empty-panel .band-title  { color: var(--muted); margin-top: 0; }
+#crm_root .empty-panel .total-text  { color: var(--muted); margin-bottom: -10px; }
+
+#crm_root .band-lan.empty-panel       { border: 1px dashed rgba(var(--clr-lan), 0.15) !important; border-radius: var(--radius-lg); }
+#crm_root .band-24.empty-panel        { border: 1px dashed rgba(var(--clr-24), 0.15) !important; border-radius: var(--radius-lg); }
+#crm_root .band-5.empty-panel         { border: 1px dashed rgba(var(--clr-5), 0.15) !important; border-radius: var(--radius-lg); }
+#crm_root .band-6.empty-panel         { border: 1px dashed rgba(var(--clr-6), 0.15) !important; border-radius: var(--radius-lg); }
+#crm_root .bridge-ap-band.empty-panel { border: 1px dashed rgba(var(--clr-bridge), 0.15) !important; border-radius: var(--radius-lg); }
+
+/* Waiting animation */
+#crm_root .empty-pulse {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0;
+  width: 100%;
+  margin-top: 0;
+}
+#crm_root .empty-pulse-ring {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+#crm_root .empty-pulse-ring::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  animation: emptyPulse 2.6s ease-out infinite;
+}
+#crm_root .empty-pulse-ring::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  animation: emptyPulse 2.6s ease-out 0.65s infinite;
+}
+#crm_root .empty-pulse-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(var(--clr-accent), 0.30);
+}
+#crm_root .empty-pulse-texts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+#crm_root .empty-pulse-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-top: 2px;
+  margin-bottom: -4px;
+}
+#crm_root .empty-pulse-sub {
+  font-size: 10px;
+  color: var(--muted);
+  opacity: 0.55;
+  text-align: center;
+  max-width: 200px;
+  line-height: 1.4;
+  margin-bottom: 0;
+}
+
+/* Bridge identity and device count */
+#crm_root .bridge-client-count { font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+#crm_root .bridge-device-mac   { font-size: 9.5px; font-family: monospace; font-weight: 400; color: var(--muted); opacity: 0.8; margin-top: 0px; max-width: 156px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+
+/* Devices behind a bridge */
+#crm_root .sub-clients {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+#crm_root .sub-clients-header {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(var(--clr-accent), 0.8);
+  margin-bottom: 4px;
+  padding: 2px 4px 2px 8px;
+  border-radius: var(--radius-xs);
+  border-left: 2px solid rgba(var(--clr-accent), 0.3);
+}
+#crm_root .sub-client-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  color: var(--muted);
+  background: rgba(var(--clr-black), 0.03);
+  border: 1px solid transparent;
+  cursor: default;
+  transition: background 120ms, border-color 120ms;
+}
+#crm_root .sub-client-row:hover  { background: rgba(var(--clr-black), 0.06); border-color: transparent; }
+#crm_root .sub-client-dot        { width: 5px; height: 5px; border-radius: 50%; background: rgba(var(--clr-accent), 0.45); flex-shrink: 0; align-self: center; }
+#crm_root .sub-client-host       { font-weight: 600; color: var(--text); min-width: 80px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; align-self: center; line-height: 1; margin-top: 2px; }
+#crm_root .sub-client-ip         { font-family: monospace; font-size: 10px; color: var(--muted); opacity: 0.8; align-self: center; line-height: 1; }
+#crm_root .sub-client-mac        { font-family: monospace; font-size: 10px; color: var(--muted); opacity: 0.5; margin-left: auto; align-self: center; line-height: 1; }
+#crm_root .sub-client-ipmac      { font-family: monospace; font-size: 10px; color: var(--muted); margin-left: auto; cursor: pointer; transition: opacity 120ms, color 120ms; align-self: center; line-height: 1; margin-top: 2px; }
+#crm_root .sub-client-ipmac:hover { opacity: 1; color: var(--text); }
+#crm_root .sub-clients-header    { font-size: 9px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; color: var(--muted); opacity: 0.55; margin-bottom: 2px; padding: 0 2px 0 8px; border-left: 2px solid rgba(var(--clr-accent), 0.3); }
+
+/* Inline rate icons */
+#crm_root .label-icon-left,
+#crm_root .label-icon-right { display: inline-flex; align-items: center; }
+#crm_root .icon-small       { width: 14px; height: 14px; display: inline-block; }
+#crm_root .icon-small svg   { width: 90%; height: 90%; display: block; }
+
+/* Bridge/AP panel border */
+#crm_root .bridge-ap-band { border: 2px solid rgba(var(--clr-bridge), 0.15) !important; background: transparent !important; }
+
+/* Panel borders follow the band colour. */
+#crm_root .band-lan   { background: transparent !important; border: 2px solid rgba(var(--clr-lan),   0.15) !important; outline: none !important; }
+#crm_root .band-iface { background: transparent !important; border: 2px solid rgba(var(--clr-iface), 0.15) !important; outline: none !important; }
+#crm_root .band-24    { background: transparent !important; border: 2px solid rgba(var(--clr-24),    0.15) !important; outline: none !important; }
+#crm_root .band-5     { background: transparent !important; border: 2px solid rgba(var(--clr-5),     0.15) !important; outline: none !important; }
+#crm_root .band-6     { background: transparent !important; border: 2px solid rgba(var(--clr-6),     0.15) !important; outline: none !important; }
+
+
+/* Mobile cards (portrait, below 980px) */
+@media screen and (max-width: 979px) and (orientation: portrait) {
+
+  #crm_root .pc-bands { display: none !important; }
+  #crm_root .grid     { display: block !important; }
+  #crm_root #iface_rates_wrap .band         { display: none !important; }
+  #crm_root #iface_rates_wrap .mobile-panel { display: flex !important; }
+
+  #crm_root .mobile-panel {
+    background: var(--glass-bg);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  }
+  
+  @supports (backdrop-filter: blur(1px)) {
+    #crm_root .mobile-panel { backdrop-filter: blur(12px); }
+  }
+  
+
+  #crm_root .mobile-panel .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 12px;
+    margin-left: -14px;
+    margin-right: -14px;
+    width: calc(100% + 28px);
+    border-bottom: 0.5px solid var(--line);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  #crm_root .mobile-panel .panel-title {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+  }
+
+  #crm_root .mobile-panel .panel-title .band-title-wrap:has(.freq-group) {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 0;
+  }
+  #crm_root .mobile-panel .panel-title .band-title-wrap .ap-name-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    flex-grow: 0;
+  }
+  #crm_root .mobile-panel .panel-title .band-title-wrap .freq-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Match header backgrounds to their bands. */
+  #crm_root .mobile-panel.band-24 .panel-head         { background: rgba(var(--clr-24),     0.15); }
+  #crm_root .mobile-panel.band-5 .panel-head          { background: rgba(var(--clr-5),      0.15); }
+  #crm_root .mobile-panel.band-6 .panel-head          { background: rgba(var(--clr-6),      0.15); }
+  #crm_root .mobile-panel.band-lan .panel-head        { background: rgba(var(--clr-lan),    0.15); }
+  #crm_root .mobile-panel.band-iface .panel-head      { background: rgba(var(--clr-iface), 0.15); }
+  #crm_root .mobile-panel.bridge-ap-band .panel-head  { background: rgba(var(--clr-bridge), 0.15); }
+  #crm_root .mobile-panel.empty-panel .panel-head     { padding: 3px 12px; }
+
+  /* Full-size bridge badge in the mobile heading */
+  #crm_root .mobile-panel .band-title-wrap .hint-badge-bridge {
+    font-size: 15px !important;
+  }
+
+  /* Align LAN and interface titles. */
+  #crm_root .mobile-panel.band-iface .panel-title { margin-left: 2px; }
+  #crm_root .mobile-panel.band-lan .panel-title   { margin-left: 2px; }
+
+  /* Client list spacing */
+  #crm_root .list { display: block; padding: 12px 10px 2px; }
+
+  /* Mobile client card */
+  #crm_root .client {
+    position: relative;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 9px 6px 7px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 40px;
+    box-shadow: 0 0 8px 1px rgba(var(--clr-ink), 0.15);
+    cursor: pointer;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateY(0);
+    transition: box-shadow 200ms ease, outline 200ms ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: transform;
+  }
+  #crm_root .client::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: 0;
+    pointer-events: none;
+  }
+  @supports (backdrop-filter: blur(1px)) {
+    #crm_root .client {
+      backdrop-filter: blur(12px);
+      transition: box-shadow 200ms ease, outline 200ms ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), backdrop-filter 200ms ease;
+    }
+  }
+  #crm_root .client > * { position: relative; z-index: 1; }
+  #crm_root .client > .client-top { z-index: 2; }
+  #crm_root .client:hover,
+  #crm_root .client:active {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px 1px rgba(var(--clr-ink), 0.6);
+  }
+  
+  #crm_root .client:focus,
+  #crm_root .client:focus-visible {
+    outline: none;
+  }
+  
+  #crm_root .client.graph-open {
+    outline: none;
+    outline-offset: 1px;
+    box-shadow: 0 0 10px rgba(var(--clr-accent), 0.3);
+  }
+  
+  #crm_root .client.graph-open:hover {
+    box-shadow: 0 0 10px rgba(var(--clr-accent), 0.1);
+  }
+  
+  #crm_root .client.graph-open:focus,
+  #crm_root .client.graph-open:focus-visible {
+    outline: none;
+    box-shadow: 0 0 12px rgba(var(--clr-accent), 0.4);
+  }
+  
+
+  /* Wi-Fi signal indicator */
+  #crm_root .top-dot {
+    position: absolute;
+    top: 8px; right: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    text-align: center;
+    pointer-events: none;
+  }
+  #crm_root .wifi-icon-mobile       { width: 15px; height: 15px; }
+  #crm_root .wifi-icon-mobile svg   { width: 100%; height: 100%; display: block; }
+  #crm_root .wifi-icon-pc svg       { width: auto; height: auto; max-width: 100%; max-height: 100%; display: block; }
+  #crm_root .signal-text            { font-size: 7px; color: var(--muted); font-family: monospace; line-height: 1; }
+
+  /* Client identity */
+  #crm_root .client-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding-top: 2px;
+  }
+  #crm_root .host-name-mobile {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.04;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+  }
+  #crm_root .host-name-mobile[title="Hostname not available"] { font-style: italic; color: var(--muted); }
+  #crm_root .host-mac-mobile { color: var(--muted); font-family: monospace; font-size: 9px; font-weight: 400; margin: 1px 0; cursor: pointer; transition: opacity 120ms, color 120ms; }
+  #crm_root .host-mac-mobile:hover { opacity: 1; color: var(--text); }
+  #crm_root .bridge-device-mac { color: var(--muted); font-family: monospace; font-size: 9px; font-weight: 400; margin: 1px 0; margin-top: -6px;}
+  #crm_root .lan-port-label { position: absolute; top: 6px; left: 8px; font-family: monospace; font-size: 9px; color: var(--muted); }
+
+  #crm_root .client-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 100%;
+    padding: 4px 0 3px;
+  }
+
+  /* Rx/Tx pills */
+  #crm_root .rates { display: flex; gap: 1px; align-items: center; justify-content: center; }
+  #crm_root .rate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 2px 9px;
+    background: rgba(240, 240, 240, 0.7);
+    position: relative;
+    transition: background 0.18s ease;
+    z-index: 1;
+  }
+  #crm_root .rate:hover          { background: rgba(0, 0, 0, 0.05); }
+  #crm_root .rx-rate-mobile      { border-radius: 10px 2px 2px 10px; border: 1px solid #4a8cc8; z-index: 1; }
+  #crm_root .tx-rate-mobile      { border-radius: 2px 10px 10px 2px; border: 1px solid #3caa3c; z-index: 1; }
+
+  #crm_root .rate strong {
+    display: block;
+    font-size: 0.83em;
+    font-weight: 500;
+    font-family: 'JetBrains Mono', monospace, inherit;
+    letter-spacing: 0.1px;
+    white-space: nowrap;
+    line-height: 1.25;
+  }
+  #crm_root .rx-rate-mobile strong { color: var(--text); }
+  #crm_root .tx-rate-mobile strong { color: var(--text); }
+
+  #crm_root .rate small {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.50em;
+    font-weight: 450;
+    white-space: nowrap;
+    letter-spacing: 0.15px;
+    line-height: 1;
+    margin: -1px 0;
+  }
+  #crm_root .rx-rate-mobile small     { color: var(--rx-color); opacity: 0.55; }
+  #crm_root .tx-rate-mobile small     { color: var(--tx-color); opacity: 0.55; }
+  #crm_root .rate small .icon-small   { width: 7px; height: 7px; }
+  #crm_root .rx-rate-mobile small .label-icon-left  { margin-right: -3px; }
+  #crm_root .tx-rate-mobile small .label-icon-right { margin-left:  -3px; }
+
+  /* Keep stats below the pills, not inside them. */
+  #crm_root .rate .rate-stats { display: none; }
+  #crm_root .rate-stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin: 0 0 -5px;
+  }
+  #crm_root .rate-stats-row .rate-stats {
+    display: block;
+    font-family: 'JetBrains Mono', monospace, inherit;
+    font-size: 7px;
+    line-height: 1.2;
+    opacity: 0.65;
+    white-space: pre;
+    padding: 1px 12px;
+    text-align: center;
+    letter-spacing: 0.1px;
+  }
+  #crm_root .rate-stats-row .rx-stats,
+  #crm_root .rate-stats-row .tx-stats { color: var(--muted); }
+
+  /* Totals revealed on expansion */
+  #crm_root .totals {
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin: 4px 4px 2px;
+    font-family: monospace;
+    color: var(--muted);
+    transition: height 320ms cubic-bezier(0.4, 0, 0.2, 1), opacity 320ms ease;
+  }
+  #crm_root .totals.open { opacity: 1; }
+  #crm_root .totals .totals-inner {
+    padding: 2px 10px;
+    color: var(--muted);
+    font-size: 9px;
+    text-align: left;
+    background: rgba(0,0,0,0.03);
+    border-radius: 4px;
+  }
+  #crm_root .totals .totals-inner[data-has-sub-clients] {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0;
+    background: transparent;
+  }
+  #crm_root .totals .totals-inner[data-has-sub-clients] > [data-role="totals-row"] {
+    padding: 6px 10px;
+    background: rgba(0,0,0,0.03);
+    border-radius: 4px;
+  }
+  #crm_root .totals .totals-inner[data-has-sub-clients] > .sub-clients {
+    margin-top: 6px;
+    padding: 8px 10px;
+    background: rgba(var(--clr-accent), 0.03);
+    border-radius: 4px;
+    border: 1px solid rgba(var(--clr-accent), 0.1);
+  }
+
+  /* Graph revealed on expansion */
+  #crm_root .graph-mobile {
+    box-sizing: border-box;
+    display: block;
+    height: 0;
+    overflow: hidden;
+    width: 100%;
+    flex: 1 1 auto;
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    position: relative;
+    padding: 0 6px;
+    transition: height 320ms cubic-bezier(0.4, 0, 0.2, 1), border-color 320ms ease;
+  }
+  #crm_root .graph-mobile.open {
+    border-color: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    background: var(--glass-bg);
+  }
+  #crm_root .graph-canvas-mobile {
+    width: 100%;
+    height: 170px;
+    display: block;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Compact text and controls */
+  #crm_root .total-text   { font-size: 8px; margin-bottom: 4px; }
+  #crm_root .band-ssid    { font-size: 13px; font-weight: 600; }
+  #crm_root .controls-row { gap: 4px; }
+  #crm_root .mobile-panel .client:first-child { margin-top: 4px; }
+
+  /* Badge spacing on small screens */
+  #crm_root .freq-badge                        { padding: 2px 5px 1px; }
+  #crm_root .ssid-badge                        { padding: 2px 10px; line-height: 1.2; }
+  #crm_root .lan-title-badge                   { padding: 2px 10px; line-height: 1.2; }
+  #crm_root .iface-title-badge                 { padding: 2px 10px; line-height: 1.2; }
+  #crm_root .port-badge                        { padding: 2px 5px 1px; line-height: 1.1; margin-top: -1.5px !important; }
+
+} /* Mobile portrait */
+
+/* Desktop cards (980px and up, or landscape) */
+@media screen and (min-width: 980px), screen and (orientation: landscape) {
+
+  #crm_root .grid     { display: none !important; }
+  #crm_root .pc-bands { display: flow-root !important; }
+  #crm_root #iface_rates_wrap .mobile-panel { display: none  !important; }
+  #crm_root #iface_rates_wrap .band         { display: block !important; }
+  #crm_root .h-left h1 { font-size: 24px; }
+
+  /* Desktop band container */
+  #crm_root .band {
+    background: var(--glass-bg);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    margin-bottom: 25px;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+  }
+  @supports (backdrop-filter: blur(1px)) {
+    #crm_root .band { backdrop-filter: blur(12px); }
+  }
+  #crm_root .band.band-iface {
+    /* Keep the interface band above the client bands. */
+    z-index: 10;
+  }
+
+  /* Desktop band heading */
+  #crm_root .band-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 12px;
+    margin: -12px -14px 0 -14px;
+    width: calc(100% + 28px);
+    border-bottom: 0.5px solid var(--line);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    position: relative;
+    z-index: 1;
+  }
+  #crm_root .band-24 .band-head         { background: rgba(var(--clr-24),     0.15); }
+  #crm_root .band-5 .band-head          { background: rgba(var(--clr-5),      0.15); }
+  #crm_root .band-6 .band-head          { background: rgba(var(--clr-6),      0.15); }
+  #crm_root .band-lan .band-head        { background: rgba(var(--clr-lan),    0.15); }
+  #crm_root .band-iface .band-head      { background: rgba(var(--clr-iface),  0.15); }
+  #crm_root .band.bridge-ap-band .band-head { background: rgba(var(--clr-bridge), 0.15); }
+  #crm_root .band-iface .band-title     { margin-left: -4px; }
+
+  #crm_root .empty-panel .band-head     { padding: 4px 12px; }
+  #crm_root .empty-panel .panel-foot    { display: none !important; }
+  #crm_root .empty-panel .empty-pulse-sub { margin-bottom: -8px; }
+
+  #crm_root .band-inner { padding-top: 12px; }
+
+  /* Desktop title layout */
+  #crm_root .band-title {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 0;
+    flex-grow: 1;
+    position: relative;
+  }
+
+  /* Larger title badges on desktop */
+  #crm_root .lan-title-badge {
+    font-size: 16px;
+    padding: 2px 10px;
+    border-radius: 6px;
+    margin-left: -7px !important;
+  }
+  #crm_root .iface-title-badge {
+    font-size: 16px;
+    padding: 2px 10px !important;
+    border-radius: 6px;
+  }
+  #crm_root .ssid-badge {
+    font-size: 16px;
+    padding: 2px 10px;
+    border-radius: 6px;
+    margin-left: -7px !important;
+  }
+
+  #crm_root .band-title .band-title-wrap:has(.freq-group) {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 1px;
+  }
+  #crm_root .band-title .freq-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  #crm_root .band-title .ap-name-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    flex-grow: 0;
+  }
+
+  #crm_root .panel-count { padding-right: 4px; }
+
+  /* Space between desktop cards */
+  #crm_root .client-wrapper             { position: relative; margin-bottom: 18px; z-index: 1; }
+  #crm_root .client-wrapper:first-child { margin-top: 4px; }
+
+  /* Desktop client card */
+  #crm_root .client {
+    display: grid;
+    grid-template-columns: 100px 0.8fr 1.2fr;
+    grid-template-rows: auto auto;
+    padding: 5px;
+    background: var(--glass-bg) !important;
+    border: 1.5px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 0 10px rgba(var(--clr-ink), 0.3);
+    cursor: pointer;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    position: relative;
+    z-index: 2;
+    min-width: 560px;
+    overflow: visible;
+    transform: translateY(0);
+    transition: box-shadow 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: transform;
+  }
+  /* Keep the overlay behind card text and controls. */
+  #crm_root .client::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: 0;
+    pointer-events: none;
+  }
+  @supports (backdrop-filter: blur(1px)) {
+    #crm_root .client {
+      backdrop-filter: blur(12px);
+      transition: box-shadow 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                  transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                  backdrop-filter 260ms ease;
+    }
+  }
+  #crm_root .client > * { position: relative; z-index: 1; }
+  #crm_root .client:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px 1px rgba(var(--clr-ink), 0.6) !important;
+    outline-offset: 2px;
+  }
+  #crm_root .client:focus,
+  #crm_root .client:focus-visible {
+    outline: none !important;
+  }
+  #crm_root .client.graph-open {
+    outline: none !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 15px rgba(var(--clr-accent), 0.25);
+  }
+  
+  #crm_root .client.graph-open:hover {
+    box-shadow: 0 0 15px rgba(var(--clr-accent), 0.1);
+  }
+  
+  #crm_root .client.graph-open:focus,
+  #crm_root .client.graph-open:focus-visible {
+    outline: none !important;
+    box-shadow: 0 0 18px rgba(var(--clr-accent), 0.4) !important;
+  }
+  
+  /* Client identity column */
+  #crm_root .left-stack {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px;
+    gap: 6px;
+    z-index: 3;
+    position: relative;
+  }
+  #crm_root .left-stack .host-top  { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; max-width: 156px; }
+  #crm_root .left-stack .hostname  { margin: 0; padding: 0; font-weight: 600; font-size: 1.01em; color: var(--text); line-height: 1.15; overflow-wrap: break-word; word-break: break-word; white-space: normal; }
+  #crm_root .left-stack .mac       { margin-top: 2px; font-size: 9.5px; font-weight: 400; font-family: monospace; color: var(--muted); max-width: 156px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; transition: opacity 120ms, color 120ms; }
+  #crm_root .left-stack .mac:hover { opacity: 1; color: var(--text); }
+  #crm_root .left-stack .hostname[title="Hostname not available"] { font-style: italic; color: var(--muted); }
+
+  #crm_root .left-stack .signal-bottom {
+    position: absolute;
+    bottom: 2px; left: 10px;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  #crm_root .wifi-icon-pc {
+    width: 32px; height: 47px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0 -14px -4px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  #crm_root .cl_signal       { margin-top: 0; vertical-align: middle; }
+  #crm_root .signal-text-pc  { font-size: 11px; color: var(--muted); margin: 0; line-height: 1; white-space: nowrap; }
+  #crm_root .lan-port-label-pc { position: absolute; font-family: monospace; font-size: 11px; color: var(--muted); left: 4px; bottom: 2px; }
+
+  /* Receive/transmit column */
+  #crm_root .rates-wrapper {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    min-width: 0;
+  }
+  #crm_root .rates { display: flex; gap: 1px; align-items: center; justify-content: center; min-width: 0; }
+
+  #crm_root .rx,
+  #crm_root .tx {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 3px 22px;
+    background: rgba(240, 240, 240, 0.7);
+    position: relative;
+    min-width: 0;
+    transition: background 0.18s ease;
+  }
+  #crm_root .rx:hover,
+  #crm_root .tx:hover    { background: rgba(0, 0, 0, 0.05); }
+  #crm_root .rx          { border-radius: 10px 2px 2px 10px; border: 1px solid #4a8cc8; }
+  #crm_root .tx          { border-radius: 2px 10px 10px 2px; border: 1px solid #3caa3c; }
+
+  #crm_root .rate-number {
+    font-size: 0.96em;
+    font-weight: 550;
+    font-family: 'JetBrains Mono', monospace, inherit;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    line-height: 1.25;
+    margin-top: -1px;
+  }
+  #crm_root .rx .rate-number { color: var(--text); opacity: .95; }
+  #crm_root .tx .rate-number { color: var(--text); opacity: .95; }
+
+  #crm_root .rate-label {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.60em;
+    font-weight: 500;
+    white-space: nowrap;
+    letter-spacing: 0.15px;
+    line-height: 1;
+    margin: 1px 0 -2px;
+    opacity: .9;
+  }
+  #crm_root .rx .rate-label         { color: var(--rx-color); opacity: 0.55; }
+  #crm_root .tx .rate-label         { color: var(--tx-color); opacity: 0.55; }
+  #crm_root .rate-label .icon-small { width: 7px; height: 7px; margin-bottom: 2px; }
+
+  #crm_root .rate-stats { display: none; }
+  #crm_root .rate-stats-row { display: flex; justify-content: center; gap: 1px; margin-top: 3px; }
+  #crm_root .rate-stats-row .rate-stats {
+    display: block;
+    font-family: 'JetBrains Mono', monospace, inherit;
+    font-size: 8px;
+    line-height: 1.4;
+    opacity: 0.85;
+    white-space: pre;
+    padding: 1px 20px;
+    text-align: center;
+    letter-spacing: 0.25px;
+  }
+  #crm_root .rate-stats-row .rx-stats,
+  #crm_root .rate-stats-row .tx-stats { color: var(--muted); }
+
+  #crm_root .icon     { width: 14px; height: 14px; display: inline-block; }
+  #crm_root .icon svg { width: 100%; height: 100%; display: block; }
+
+  /* Traffic graph column */
+  #crm_root .graph {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    border: 1.5px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: 0.3px;
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    min-height: 130px;
+    position: relative;
+    z-index: 2;
+  }
+  #crm_root .graph canvas {
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    display: block;
+    border-radius: var(--radius-sm);
+    cursor: crosshair;
+    z-index: 1;
+  }
+
+  @supports (backdrop-filter: blur(1px)) {
+    #crm_root .graph {
+      backdrop-filter: blur(12px);
+    }
+    #crm_root .graph-mobile {
+      backdrop-filter: blur(12px);
+    }
+  }
+
+  /* Full-width totals below the card */
+  #crm_root .pc-totals {
+    grid-column: 1 / -1;
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    font-family: monospace;
+    color: var(--muted);
+    transition: height 320ms cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 320ms ease;
+  }
+  #crm_root .pc-totals.open { opacity: 1; }
+  #crm_root .pc-totals .inner { padding: 5px 12px 3px; font-size: 10px; display: flex; align-items: center; color: var(--muted); background: rgba(0,0,0,0.03); border-radius: 8px; margin-top: 4px; }
+  #crm_root .pc-totals .inner[data-has-sub-clients] { flex-direction: column; align-items: stretch; padding: 0; background: transparent; gap: 8px; }
+  #crm_root .pc-totals .inner[data-has-sub-clients] > [data-role="totals-row"] {
+    padding: 5px 12px 3px;
+    background: rgba(0,0,0,0.03);
+    border-radius: 8px;
+  }
+  #crm_root .pc-totals .inner[data-has-sub-clients] > .sub-clients {
+    padding: 8px 12px;
+    background: rgba(var(--clr-accent), 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(var(--clr-accent), 0.1);
+    margin-top: 0;
+  }
+
+} /* Desktop and landscape */
+
+/* Loading state and fast-poll warning */
+#loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 99999;
+  font-family: system-ui, sans-serif;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+#loading-overlay.hidden { opacity: 0; pointer-events: none; }
+
+.spinner {
+  width: 40px; height: 40px;
+  border: 4px solid var(--line);
+  border-top-color: #1f8ef1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+.loading-text { margin-top: 12px; font-size: 14px; color: #333; }
+
+#poll-warn-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: #1e293b;
+  color: #fcd34d;
+  font-size: 13px;
+  font-family: system-ui, sans-serif;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm, 8px);
+  box-shadow: 0 6px 20px rgba(var(--clr-black), 0.4);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 99999;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+#poll-warn-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Keyframes */
+@keyframes hdrSweep {
+  0%   { transform: scaleX(0); transform-origin: left;  opacity: 0.5; }
+  48%  { transform: scaleX(1); transform-origin: left;  opacity: 1;   }
+  52%  { transform: scaleX(1); transform-origin: right; opacity: 1;   }
+  100% { transform: scaleX(0); transform-origin: right; opacity: 0.5; }
+}
+@keyframes spin       { to { transform: rotate(360deg); } }
+@keyframes emptyPulse { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(2); opacity: 0; } }
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+  #crm_root {
+    --text:         #e6eef8;
+    --muted:        #9aa4b2;
+    --line:         #16202b;
+    --shadow-sm:    2px 2px 6px  rgba(var(--clr-black), 0.40);
+    --shadow-md:    2px 2px 10px rgba(var(--clr-black), 0.45);
+    --shadow-lg:    0 0 20px     rgba(var(--clr-abyss), 0.70);
+    --hover-outline: rgba(var(--clr-mid), 0.18);
+    --glass-bg:     rgba(0, 0, 0, 0.02);
+    --glass-border: rgba(255, 255, 255, 0.07);
+    --glass-shadow: 2px 8px 16px rgba(0, 0, 0, 0.3);
+    --rx-color:     rgba(74, 140, 200, 0.85);
+    --tx-color:     rgba(60, 170, 60, 0.85);
+  }
+
+  /* Header colours */
+  #crm_root header           { border-color: var(--line); border-bottom-color: rgba(var(--clr-white), 0.09); }
+  #crm_root #last            { color: rgba(31, 180, 241, 0.4); }
+  #crm_root #forceRefreshBtn          { border-color: rgba(var(--clr-accent), 0.35); }
+  #crm_root #forceRefreshBtn:hover    { color: rgba(var(--clr-white), 1); border-color: rgba(var(--clr-accent), 0.70); }
+
+  /* Dropdown label colours */
+  #crm_root .select-mini .trigger .label,
+  #crm_root .select-mini .trigger #autoLabel,
+  #crm_root .select-mini .trigger #unitLabel                 { color: rgba(var(--clr-white), 0.75); }
+  #crm_root .select-mini .trigger:hover .label,
+  #crm_root .select-mini .trigger:hover #autoLabel,
+  #crm_root .select-mini .trigger:hover #unitLabel,
+  #crm_root .select-mini .trigger.glow .label,
+  #crm_root .select-mini .trigger.glow #autoLabel,
+  #crm_root .select-mini .trigger.glow #unitLabel            { color: rgba(var(--clr-white), 1); }
+
+  /* Dark dropdown background */
+  #crm_root .dd-panel {
+    background: #222222;
+    border-color: rgba(var(--clr-accent), 0.40);
+    box-shadow: 0 6px 20px rgba(var(--clr-abyss), 0.65);
+  }
+  #crm_root .dd-panel button.opt          { color: rgba(230, 238, 248, 0.50); }
+  #crm_root .dd-panel button.opt:hover    { background: rgba(var(--clr-accent), 0.12); color: rgba(230, 238, 248, 0.92); }
+  #crm_root .dd-panel button.opt.selected         { background: rgba(var(--clr-accent), 0.18); color: #64b8ff; }
+  #crm_root .dd-panel button.opt.selected::before { background: #64b8ff; }
+  #crm_root #ifacePanel_pc.dd-panel button.opt    { color: rgba(var(--clr-white), 0.90) !important; }
+  #crm_root #ifacePanel_mob.dd-panel button.opt   { color: rgba(var(--clr-white), 0.80) !important; }
+  #crm_root #ifacePanel_pc.dd-panel button.opt-combined,
+  #crm_root #ifacePanel_mob.dd-panel button.opt-combined { color: rgba(var(--clr-iface), 0.9) !important; }
+
+  /* Dim frequency suffixes in the dark theme. */
+  #crm_root .dd-panel button.opt .freq-part,
+  #crm_root .label .freq-part {
+    font-size: 0.85em;
+    opacity: 0.8;
+  }
+
+  /* Band badge colours */
+  #crm_root .ssid-badge-24,
+  #crm_root .ssid-badge-5,
+  #crm_root .ssid-badge-6            { background: transparent; border-color: transparent; color: var(--text); }
+  #crm_root .freq-badge-24           { background: rgba(var(--clr-24), 0.12); border: 1px solid rgba(var(--clr-24), 0.2); color: rgba(var(--clr-24), 1); }
+  #crm_root .freq-badge-5            { background: rgba(var(--clr-5), 0.12);  border: 1px solid rgba(var(--clr-5), 0.2);  color: rgba(var(--clr-5), 1); }
+  #crm_root .freq-badge-6            { background: rgba(var(--clr-6), 0.12);  border: 1px solid rgba(var(--clr-6), 0.2);  color: rgba(var(--clr-6), 1); }
+  #crm_root .lan-title-badge         { background: transparent; border-color: transparent; color: var(--text); padding: 2px 10px; }
+  #crm_root .iface-title-badge       { background: transparent; border-color: transparent; color: rgba(var(--clr-white), 0.9); padding: 2px 10px; }
+
+  /* Sub-client row backgrounds */
+  #crm_root .sub-client-row          { background: rgba(var(--clr-white), 0.02); }
+  #crm_root .sub-client-row:hover    { background: rgba(var(--clr-white), 0.06); }
+  
+  /* Sub-client list background */
+  #crm_root .pc-totals .inner[data-has-sub-clients] > .sub-clients,
+  #crm_root .totals .totals-inner[data-has-sub-clients] > .sub-clients {
+    background: rgba(var(--clr-white), 0.01);
+    border-color: rgba(var(--clr-white), 0.06);
+  }
+  
+  /* Sub-client heading */
+  #crm_root .sub-clients-header {
+    border-left-color: rgba(var(--clr-accent), 0.2);
+    color: rgba(var(--clr-white), 0.7);
+  }
+
+  /* Brighten clickable identities on hover. */
+  #crm_root .left-stack .mac:hover,
+  #crm_root .host-mac-mobile:hover,
+  #crm_root .sub-client-ipmac:hover {
+    color: rgba(var(--clr-white), 1);
+  }
+
+  /* Totals background */
+  #crm_root .totals .totals-inner    { background: rgba(var(--clr-white), 0.02); }
+  #crm_root .pc-totals .inner        { background: rgba(var(--clr-white), 0.02); }
+  
+  /* Bridge totals and device lists have separate backgrounds. */
+  #crm_root .pc-totals .inner[data-has-sub-clients] {
+    background: transparent;
+  }
+  #crm_root .totals .totals-inner[data-has-sub-clients] {
+    background: transparent;
+  }
+  
+  /* Background behind bridge totals */
+  #crm_root .pc-totals .inner[data-has-sub-clients] > [data-role="totals-row"] {
+    background: rgba(var(--clr-white), 0.02);
+  }
+  #crm_root .totals .totals-inner[data-has-sub-clients] > [data-role="totals-row"] {
+    background: rgba(var(--clr-white), 0.02);
+  }
+
+  /* Subtle band borders */
+  #crm_root .bridge-ap-band          { border: 1px solid rgba(var(--clr-bridge), 0.12) !important; }
+  #crm_root .band-lan                { border: 1px solid rgba(var(--clr-lan),    0.12) !important; }
+  #crm_root .band-iface              { border: 1px solid rgba(var(--clr-iface),  0.12) !important; }
+  #crm_root .band-24                 { border: 1px solid rgba(var(--clr-24),     0.12) !important; }
+  #crm_root .band-5                  { border: 1px solid rgba(var(--clr-5),      0.12) !important; }
+  #crm_root .band-6                  { border: 1px solid rgba(var(--clr-6),      0.12) !important; }
+
+  /* Use a thinner border in the dark theme. */
+  #crm_root .client {
+    border: 1px solid var(--glass-border) !important;
+  }
+
+  /* Dashed borders for empty bands */
+  #crm_root .band-lan.empty-panel        { border: 1px dashed rgba(var(--clr-lan), 0.12) !important; border-radius: var(--radius-lg); }
+  #crm_root .band-24.empty-panel         { border: 1px dashed rgba(var(--clr-24), 0.12) !important; border-radius: var(--radius-lg); }
+  #crm_root .band-5.empty-panel          { border: 1px dashed rgba(var(--clr-5), 0.12) !important; border-radius: var(--radius-lg); }
+  #crm_root .band-6.empty-panel          { border: 1px dashed rgba(var(--clr-6), 0.12) !important; border-radius: var(--radius-lg); }
+  #crm_root .bridge-ap-band.empty-panel  { border: 1px dashed rgba(var(--clr-bridge), 0.12) !important; border-radius: var(--radius-lg); }
+
+  /* Device hints and port labels */
+  #crm_root .hint-badge-bridge     { background: rgba(var(--clr-bridge), 0.18); border: 1px solid rgba(var(--clr-bridge), 0.3); color: #a5b4fc; }
+  #crm_root .hint-badge-subap      { background: rgba(var(--clr-bridge), 0.12); border: 1px solid rgba(var(--clr-bridge), 0.3); color: #a5b4fc; padding: 0px 5px; font-size: 8px; }
+  #crm_root .hint-badge-router_oui { background: rgba(245,158,11,0.18); border: 1px solid transparent; color: #fbbf24; }
+  #crm_root .hint-badge-gateway    { background: rgba(239,68,68,0.18);  border: 1px solid transparent; color: #fca5a5; }
+  #crm_root .hint-badge-eth_issue  { background: rgba(239,68,68,0.16);  border: 1px solid transparent; color: #fca5a5; font-weight: 700; }
+  #crm_root .port-badge            { background: rgba(var(--clr-bridge), 0.20); border: 1px solid rgba(var(--clr-bridge), 0.2); color: #a5b4fc; }
+
+  /* Only the band heading gets white bridge text.
+     Leave the smaller LAN-card hints and port badges alone. */
+  #crm_root .band-title-wrap .hint-badge-bridge {
+    background: rgba(var(--clr-bridge), 0.28);
+    border: 1px solid transparent;
+    color: rgba(var(--clr-white), 0.92);
+  }
+
+  /* Rx/Tx pill colours */
+  #crm_root .rx, #crm_root .rx-rate-mobile { border-color: rgba(74, 140, 200, 0.85); }
+  #crm_root .tx, #crm_root .tx-rate-mobile { border-color: rgba(60, 170,  60, 0.85); }
+  #crm_root .rx, #crm_root .tx,
+  #crm_root .rate { background: rgba(38, 37, 37, 0.4) !important; }
+  #crm_root .rx:hover, #crm_root .tx:hover,
+  #crm_root .rate:hover { background: rgba(255,255,255,0.055) !important; }
+
+  /* Keep rate values in the normal text colour. */
+  #crm_root .rx .rate-number,
+  #crm_root .tx .rate-number,
+  #crm_root .rx-rate-mobile strong,
+  #crm_root .tx-rate-mobile strong {
+    color: var(--text);
+  }
+
+  /* Desktop header tints */
+  #crm_root .band-24 .band-head          { background: rgba(var(--clr-24),     0.12); }
+  #crm_root .band-5 .band-head           { background: rgba(var(--clr-5),      0.12); }
+  #crm_root .band-6 .band-head           { background: rgba(var(--clr-6),      0.12); }
+  #crm_root .band-lan .band-head         { background: rgba(var(--clr-lan),    0.12); }
+  #crm_root .band-iface .band-head       { background: rgba(var(--clr-iface),  0.12); }
+  #crm_root .band.bridge-ap-band .band-head { background: rgba(var(--clr-bridge), 0.12); }
+
+  /* Mobile header tints */
+  #crm_root .mobile-panel.band-24 .panel-head         { background: rgba(var(--clr-24),     0.12); }
+  #crm_root .mobile-panel.band-5 .panel-head          { background: rgba(var(--clr-5),      0.12); }
+  #crm_root .mobile-panel.band-6 .panel-head          { background: rgba(var(--clr-6),      0.12); }
+  #crm_root .mobile-panel.band-lan .panel-head        { background: rgba(var(--clr-lan),    0.12); }
+  #crm_root .mobile-panel.band-iface .panel-head      { background: rgba(var(--clr-iface), 0.12); }
+  #crm_root .mobile-panel.bridge-ap-band .panel-head  { background: rgba(var(--clr-bridge), 0.12); }
+
+  /* Keep dark-theme title alignment consistent. */
+  #crm_root .mobile-panel.band-iface .panel-title { margin-left: 2px; }
+  #crm_root .mobile-panel.band-lan .panel-title   { margin-left: 2px; }
+
+  /* Compact empty mobile panels */
+  #crm_root .mobile-panel.empty-panel .panel-head    { padding: 4px 12px; }
+  #crm_root .mobile-panel.empty-panel .panel-foot    { display: none !important; }
+
+  /* Graph surfaces use the card colours with a softer border. */
+  #crm_root .graph {
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 2px 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  #crm_root .graph-mobile.open {
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 2px 8px 16px rgba(0, 0, 0, 0.3);
+    background: var(--glass-bg);
+  }
+
+}
+
+/* Small-screen controls (portrait, below 980px) */
+@media screen and (max-width: 979px) and (orientation: portrait) {
+  #crm_root header { height: auto; min-height: 52px; padding: 7px 12px; }
+  #crm_root .select-mini .trigger { padding: 2px 6px; }
+  #crm_root .select-mini .trigger .label,
+  #crm_root .select-mini .trigger #autoLabel,
+  #crm_root .select-mini .trigger #unitLabel { font-size: 10px; }
+  #crm_root #last { font-size: 9px; }
+  #crm_root #forceRefreshBtn { padding: 2px 6px !important; font-size: 10px !important; height: auto !important; line-height: 1.2 !important; gap: 2px !important; }
+  #crm_root #forceRefreshBtn .refresh-icon svg { width: 9px; height: 9px; }
+  #crm_root #unitPanel.dd-panel button.opt { font-size: 8px !important; padding: 4px 6px; white-space: nowrap; }
+  #crm_root #autoPanel.dd-panel button.opt { font-size: 12px !important; padding: 5px 8px; white-space: nowrap; }
+  #crm_root #unitPanel.dd-panel,
+  #crm_root #autoPanel.dd-panel { min-width: 100%; }
+  #crm_root .empty-panel .panel-title,
+  #crm_root .empty-panel .band-title { color: var(--muted); margin-top: -1px; }
+  #crm_root .empty-panel .total-text { color: var(--muted); margin-bottom: 0; margin-top: -1px; }
+  #crm_root .empty-panel .panel-foot { display: none !important; }
+
+}
+
+/* Desktop dropdown sizing */
+@media screen and (min-width: 980px), screen and (orientation: landscape) {
+  #crm_root #unitPanel.dd-panel button.opt { font-size: 10px; padding: 5px 8px; white-space: nowrap; }
+  #crm_root #autoPanel.dd-panel button.opt { font-size: 12px; padding: 5px 8px; white-space: nowrap; }
+  #crm_root #unitPanel.dd-panel,
+  #crm_root #autoPanel.dd-panel { min-width: 100%; }
+}
+
+/* Device hints and bridge port labels */
+#crm_root .hint-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+#crm_root .hint-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  line-height: 1.3;
+  flex-shrink: 1;
+}
+#crm_root .hint-badge-bridge     { background: rgba(var(--clr-bridge), 0.13); border: 1px solid rgba(var(--clr-bridge), 0.3); color: #818cf8; }
+#crm_root .hint-badge-subap      { background: rgba(var(--clr-bridge), 0.08); border: 1px solid rgba(var(--clr-bridge), 0.3); color: #818cf8; padding: 1px 5px; font-size: 9px; }
+#crm_root .hint-badge-router_oui { background: rgba(245,158,11,0.12); border: 1px solid transparent; color: #d97706; }
+#crm_root .hint-badge-gateway    { background: rgba(239,68,68,0.12);  border: 1px solid transparent; color: #ef4444; }
+#crm_root .hint-badge-eth_issue  { background: rgba(239,68,68,0.10);  border: 1px solid transparent; color: #ef4444; font-weight: 700; }
+
+/* No visible border on the light-theme bridge heading. */
+#crm_root .band-title-wrap .hint-badge-bridge {
+  border: 1px solid transparent;
+}
+
+/* Bridge port badge, sized like the frequency badge */
+#crm_root .port-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 5px 0px;
+  border-radius: 3px;
+  font-size: 0.68em;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 1;
+  line-height: 1.1;
+  font-family: monospace;
+  background: rgba(var(--clr-bridge), 0.13);
+  border: 1px solid rgba(var(--clr-bridge), 0.18);
+  color: #818cf8;
+}
+
+
+

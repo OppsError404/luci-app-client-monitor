@@ -1,0 +1,286 @@
+#!/bin/sh
+# Refresh /tmp/client_monitor/current-aps.json for collector.lua.
+# Called by hotplug or manually when AP discovery is needed.
+#
+# Don't use set -e: ubus, iw and sysfs probes can fail during interface changes.
+
+LOG_DIR="/tmp/client_monitor"
+AP_LIST_FILE="${LOG_DIR}/current-aps.json"
+
+# cleanup_json uses this when an incomplete list needs closing.
+AP_COUNT=0
+
+mkdir -p "$LOG_DIR"
+
+log() {
+    local level="$1"
+    local message="$2"
+    local priority
+    case "$level" in
+        DEBUG) priority="debug" ;;
+        INFO)  priority="info" ;;
+        WARN)  priority="warning" ;;
+        ERROR) priority="err" ;;
+        *)     priority="info" ;;
+    esac
+    logger -t "client-monitor" -p "user.$priority" "$message"
+}
+
+# Strip control bytes and escape JSON string contents; callers add the quotes.
+# BusyBox tr needs octal ranges here, not POSIX character classes.
+json_escape() {
+    printf '%s' "$1" | tr -d '\000-\037\177' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'
+}
+
+# Clear abandoned temp files and close an incomplete published AP list.
+cleanup_json() {
+    # Remove leftovers from interrupted runs.
+    rm -f "${AP_LIST_FILE}".tmp.* 2>/dev/null
+
+    if [ -f "$AP_LIST_FILE" ]; then
+        local last_line
+        last_line=$(tail -1 "$AP_LIST_FILE" 2>/dev/null || echo "")
+        if echo "$last_line" | grep -q '^  "aps": \['; then
+            echo "  ]," >> "$AP_LIST_FILE"
+            echo "  \"ap_count\": 0" >> "$AP_LIST_FILE"
+            echo "}" >> "$AP_LIST_FILE"
+            log "WARN" "AP JSON was incomplete, closed it in cleanup"
+        elif echo "$last_line" | grep -q '^    }$'; then
+            echo "  ]," >> "$AP_LIST_FILE"
+            echo "  \"ap_count\": $AP_COUNT" >> "$AP_LIST_FILE"
+            echo "}" >> "$AP_LIST_FILE"
+            log "WARN" "AP JSON was missing closing brackets, fixed in cleanup"
+        fi
+    fi
+}
+
+# Signal exits still run the EXIT cleanup.
+trap cleanup_json EXIT
+trap 'exit 0' INT TERM
+
+# Check the system rather than the name so custom AP interface names work.
+is_wireless_iface() {
+    local iface="$1"
+
+    if [ -z "$iface" ] || [ ! -d "/sys/class/net/$iface" ]; then
+        return 1
+    fi
+
+    # Some nl80211 APs lack this directory, so keep the other probes below.
+    if [ -d "/sys/class/net/$iface/wireless" ]; then
+        return 0
+    fi
+
+    # A matching hostapd object also identifies an AP.
+    if command -v ubus >/dev/null 2>&1; then
+        if ubus list "hostapd.$iface" 2>/dev/null | grep -q "^hostapd\.$iface\$"; then
+            return 0
+        fi
+    fi
+
+    # Some drivers expose the IEEE80211 ARPHRD types (801 or 803).
+    if [ -f "/sys/class/net/$iface/type" ]; then
+        local iface_type
+        iface_type=$(cat "/sys/class/net/$iface/type" 2>/dev/null)
+        if [ "$iface_type" = "803" ] || [ "$iface_type" = "801" ]; then
+            return 0
+        fi
+    fi
+
+    # Let iw handle drivers that the earlier checks missed.
+    if command -v iw >/dev/null 2>&1; then
+        if iw dev "$iface" info >/dev/null 2>&1; then
+            return 0
+        fi
+    fi
+
+    return 1
+}
+
+# Set ssid_json (quoted and escaped) and frequency (MHz, or 0 if unknown).
+parse_ap_status() {
+    local ap_status="$1"
+    ssid_json='"unknown"'
+    frequency=0
+
+    if command -v jsonfilter >/dev/null 2>&1; then
+        local raw_ssid
+        raw_ssid=$(printf '%s' "$ap_status" | jsonfilter -e '@.ssid' 2>/dev/null)
+        [ -n "$raw_ssid" ] || raw_ssid="unknown"
+        ssid_json="\"$(json_escape "$raw_ssid")\""
+
+        frequency=$(printf '%s' "$ap_status" | jsonfilter -e '@.frequency' 2>/dev/null)
+        [ -n "$frequency" ] || frequency=$(printf '%s' "$ap_status" | jsonfilter -e '@.freq' 2>/dev/null)
+    elif command -v jq >/dev/null 2>&1; then
+        local jq_out
+        jq_out=$(printf '%s' "$ap_status" | jq -c 'if .ssid == null then "unknown" else .ssid end | @json' 2>/dev/null)
+        [ -n "$jq_out" ] && ssid_json="$jq_out"
+
+        frequency=$(printf '%s' "$ap_status" | jq -r '.frequency // .freq // 0' 2>/dev/null)
+    else
+        log "WARN" "neither jsonfilter nor jq available, SSID/freq will be placeholders"
+    fi
+
+    # This goes into JSON without quotes, so reject non-numeric values.
+    case "$frequency" in
+        ''|*[!0-9]*) frequency=0 ;;
+    esac
+}
+
+# Build the AP list off to the side; readers only see the finished file.
+discover_aps() {
+    local source="$1"
+    log "INFO" "Starting AP discovery (source: $source)"
+
+    local timestamp
+    timestamp="$(date +%s)"
+    AP_COUNT=0
+
+    # Discard temp files left by interrupted discovery runs.
+    rm -f "${AP_LIST_FILE}".tmp.* 2>/dev/null
+
+    local temp_file="${AP_LIST_FILE}.tmp.$$"
+
+    {
+        echo "{"
+        echo "  \"timestamp\": $timestamp,"
+        echo "  \"aps\": ["
+    } > "$temp_file"
+
+    if command -v ubus >/dev/null 2>&1; then
+        # hostapd.* selects per-interface objects, not hostapd or hostapd-auth.
+        local hostapd_instances
+        hostapd_instances=$(ubus list 'hostapd.*' 2>/dev/null)
+        # Older ubus versions may not support wildcard listing.
+        if [ -z "$hostapd_instances" ]; then
+            hostapd_instances=$(ubus list 2>/dev/null | grep '^hostapd\..*' || true)
+        fi
+
+        for instance in $hostapd_instances; do
+            [ "$instance" = "hostapd" ] && continue
+            [ "$instance" = "hostapd-auth" ] && continue
+
+            local iface="${instance#hostapd.}"
+
+            if ! is_wireless_iface "$iface"; then
+                log "DEBUG" "Skipping non-wireless interface: $iface"
+                continue
+            fi
+
+            local ap_status
+            ap_status=$(ubus call "$instance" get_status 2>/dev/null || echo "")
+
+            if [ -z "$ap_status" ]; then
+                log "WARN" "Could not get status for AP interface: $iface"
+                continue
+            fi
+
+            local ssid_json frequency
+            parse_ap_status "$ap_status"
+
+            local iface_json
+            iface_json="\"$(json_escape "$iface")\""
+
+            if [ "$AP_COUNT" -gt 0 ]; then
+                echo "    ," >> "$temp_file"
+            fi
+
+            cat >> "$temp_file" <<EOF
+    {
+      "iface": $iface_json,
+      "ssid": $ssid_json,
+      "freq": $frequency
+    }
+EOF
+            AP_COUNT=$((AP_COUNT + 1))
+            log "INFO" "Added AP: $iface freq: $frequency"
+        done
+    else
+        log "ERROR" "ubus command not found, cannot discover APs"
+    fi
+
+    # Finish the list before publishing it.
+    {
+        echo "  ],"
+        echo "  \"ap_count\": $AP_COUNT"
+        echo "}"
+    } >> "$temp_file"
+
+    # Rename keeps readers from seeing a half-written list.
+    if mv -f "$temp_file" "$AP_LIST_FILE" 2>/dev/null; then
+        log "INFO" "AP discovery completed: $AP_COUNT APs found (file updated atomically)"
+    else
+        log "ERROR" "Failed to atomically update AP JSON file"
+        rm -f "$temp_file" 2>/dev/null
+    fi
+}
+
+# Rebuild the AP list after a wireless interface change.
+hotplug_main() {
+    local action="$1" iface="$2"
+    log "INFO" "Hotplug event received: ACTION=$action INTERFACE=$iface"
+
+    # The interface may already be gone on teardown. Don't require wireless
+    # detection here; discovery only lists hostapd instances that still exist.
+    case "$action" in
+        remove|unregister|down|ifdown|link)
+            log "INFO" "Teardown event for $iface - rediscovering APs"
+            discover_aps "hotplug:$action:$iface"
+            return
+            ;;
+    esac
+
+    # Other events need a live wireless interface.
+    if is_wireless_iface "$iface"; then
+        log "INFO" "Wireless interface $iface action: $action"
+        discover_aps "hotplug:$action:$iface"
+    else
+        log "DEBUG" "Non-wireless interface $iface - ignoring"
+    fi
+}
+
+print_usage() {
+    echo "Client Monitor - Hotplug Only Version (Simplified)"
+    echo "Monitors wireless APs via hotplug events only"
+    echo "Generates only AP JSON file: $AP_LIST_FILE"
+    echo ""
+    echo "Usage:"
+    echo "  ap_monitor hotplug <action> <interface>  - Trigger from hotplug"
+    echo "  ap_monitor manual                        - Manual AP discovery"
+    echo "  ap_monitor discover                      - Manual AP discovery (alias)"
+    echo "  ap_monitor test                          - Test script"
+    echo ""
+    echo "This script is typically called by /etc/hotplug.d/net/99-client-monitor"
+    echo "when wireless interfaces change."
+    echo ""
+    echo "Wireless interface detection uses actual system detection"
+    echo "(/sys/class/net/<iface>/wireless, hostapd ubus instances, iw) instead of"
+    echo "name patterns, to support custom interface names."
+}
+
+# Entry points
+case "$1" in
+    hotplug)
+        logger -t "client-monitor" "TRIGGER: hotplug-cmd - ACTION=$2 INTERFACE=$3"
+        hotplug_main "$2" "$3"
+        ;;
+    manual|discover)
+        logger -t "client-monitor" "TRIGGER: $1 - Manual AP discovery requested"
+        discover_aps "manual"
+        echo "AP list written to $AP_LIST_FILE"
+        ;;
+    test)
+        logger -t "client-monitor" "TRIGGER: test - Script is working"
+        echo "Client Monitor - Hotplug Only Version (Simplified)"
+        echo "Log directory: $LOG_DIR"
+        echo "AP list file: $AP_LIST_FILE"
+        echo ""
+        print_usage
+        ;;
+    *)
+        print_usage
+        exit 1
+        ;;
+esac
+
+log "INFO" "Script completed successfully"

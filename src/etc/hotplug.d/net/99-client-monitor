@@ -1,0 +1,42 @@
+#!/bin/sh
+# Rediscover APs after wireless interface events.
+# The collector reads LAN link state from sysfs; force_link can mask hotplug changes.
+
+[ -n "$ACTION" ] || exit 0
+
+# Some wireless events set DEVICE rather than INTERFACE.
+IFACE="${INTERFACE:-$DEVICE}"
+[ -n "$IFACE" ] || exit 0
+
+# Skip obvious wired events before spawning ap_monitor.
+# The script checks whether the interface is actually wireless.
+case "$IFACE" in
+    phy*|wlan*|wl*|radio*|ap*|ath*|wifi*)
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+
+# Treat ifup as an add and other state changes as a removal.
+# Either way, discovery rebuilds the list from live hostapd instances.
+case "$ACTION" in
+    add|remove)
+        INTERNAL_ACTION="$ACTION"
+        ;;
+    ifup)
+        INTERNAL_ACTION="add"
+        ;;
+    *)
+        INTERNAL_ACTION="remove"
+        ;;
+esac
+
+if [ -x "/usr/bin/ap_monitor" ]; then
+    logger -t "client-monitor" "NET-HOTPLUG: $ACTION -> $INTERNAL_ACTION on $IFACE"
+    /usr/bin/ap_monitor hotplug "$INTERNAL_ACTION" "$IFACE" >/dev/null 2>&1 &
+else
+    logger -t "client-monitor" "NET-HOTPLUG: ERROR - /usr/bin/ap_monitor missing or not executable"
+fi
+
+exit 0

@@ -1,0 +1,1 @@
+{"admin/services/client_monitor": {"title": "Client Monitor", "order": 50, "action": {"type": "template", "path": "client_monitor/client_monitor"}, "depends": {"acl": ["luci-app-client-monitor"]}}}

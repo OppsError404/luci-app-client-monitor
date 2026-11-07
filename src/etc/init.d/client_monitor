@@ -1,0 +1,142 @@
+#!/bin/sh /etc/rc.common
+# Prepare the web assets and manage the on-demand collector's lifecycle.
+
+USE_PROCD=1
+START=65
+STOP=10
+
+NAME="client_monitor"
+
+log() { logger -t "$NAME" "$*"; }
+
+# Unpack web assets into RAM to keep the flash copies compressed.
+
+_decompress_file() {
+    local gz="$1" ram_dir="$2" src_dir="$3"
+    [ -f "$gz" ] || return 0
+    case "$gz" in *.gz.gz) return 0;; esac
+
+    local base ram_file target
+    base="$(basename "$gz" .gz)"
+    ram_file="$ram_dir/$base"
+    target="$src_dir/$base"
+
+    [ -f "$ram_file" ] && {
+        [ -L "$target" ] && ln -sf "$ram_file" "$target"
+        return 0
+    }
+
+    mkdir -p "$ram_dir" 2>/dev/null
+    if gunzip -c "$gz" > "$ram_file" 2>/dev/null; then
+        if [ ! -e "$target" ] || [ -L "$target" ]; then
+            ln -sf "$ram_file" "$target"
+        fi
+    else
+        rm -f "$ram_file"
+        log "WARN: failed to decompress $base"
+    fi
+}
+
+_decompress_dir() {
+    local src_dir="$1" ram_dir="$2" gz
+    for gz in "$src_dir"/*.gz; do
+        _decompress_file "$gz" "$ram_dir" "$src_dir"
+    done
+}
+
+_decompress_assets() {
+    local src_dir="/www/luci-static/resources/view/client_monitor"
+    local ram_dir="/tmp/luci-static/resources/view/client_monitor"
+    local asset target
+
+    for asset in "$src_dir"/*; do
+        [ -L "$asset" ] || continue
+        target="$(readlink "$asset" 2>/dev/null)"
+        case "$target" in
+            "$ram_dir"/*) rm -f "$asset" ;;
+        esac
+    done
+
+    rm -rf "$ram_dir"
+    _decompress_dir "$src_dir" "$ram_dir"
+}
+
+# Service hooks
+
+start_service() {
+    mkdir -p /tmp/client_monitor
+    chmod 1777 /tmp/client_monitor
+
+    # Discover APs without holding up service startup.
+    [ -x /usr/bin/ap_monitor ] && /usr/bin/ap_monitor manual >/dev/null 2>&1 &
+
+    _decompress_assets
+
+    # procd needs an instance for enable/disable; rpcd starts the real collector.
+    procd_open_instance
+    procd_set_param command /bin/true
+    procd_set_param stdout 0
+    procd_set_param stderr 0
+    procd_close_instance
+
+    log "Service started"
+}
+
+stop_service() {
+    log "Stopping..."
+
+    # A stale PID may belong to another process now. Check cmdline before killing it.
+    local pidfile="/tmp/client_monitor/daemon.pid" pid i
+    if [ -f "$pidfile" ]; then
+        read -r pid < "$pidfile" 2>/dev/null
+        if [ -n "$pid" ] && grep -q "client_monitor_collect" /proc/"$pid"/cmdline 2>/dev/null; then
+            # Lua may ignore TERM. Allow two seconds, then force it to stop.
+            kill "$pid" 2>/dev/null
+            i=0
+            while [ "$i" -lt 2 ] && kill -0 "$pid" 2>/dev/null; do
+                sleep 1
+                i=$((i + 1))
+            done
+            if kill -0 "$pid" 2>/dev/null; then
+                log "Collector daemon (pid $pid) ignored SIGTERM, sending SIGKILL"
+                kill -9 "$pid" 2>/dev/null
+            fi
+        fi
+        rm -f "$pidfile"
+    fi
+
+    log "Service stopped"
+}
+
+status_service() {
+    echo "=== $NAME status ==="
+    [ -f "/etc/rc.d/S${START}${NAME}" ] && echo "  Boot:             enabled" || echo "  Boot:             disabled"
+
+    if [ -f "/etc/hotplug.d/net/99-client-monitor" ]; then
+        echo "  Hotplug script:   present"
+    else
+        echo "  Hotplug script:   missing"
+    fi
+
+    if [ -f "/usr/bin/ap_monitor" ]; then
+        echo "  AP monitor:       present"
+        if [ -x "/usr/bin/ap_monitor" ]; then
+            echo "  AP monitor exec:  yes"
+        else
+            echo "  AP monitor exec:  no"
+        fi
+    else
+        echo "  AP monitor:       missing"
+    fi
+
+    if [ -d "/tmp/client_monitor" ]; then
+        echo "  Cache dir:        present"
+        if [ -f "/tmp/client_monitor/daemon.pid" ]; then
+            echo "  Collector daemon: running"
+        else
+            echo "  Collector daemon: stopped"
+        fi
+    else
+        echo "  Cache dir:        missing"
+    fi
+}

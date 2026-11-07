@@ -1,0 +1,278 @@
+#!/usr/bin/lua
+-- rpcd starts this daemon on the first poll. Each pass replaces data.json atomically.
+-- It stops after IDLE_TIMEOUT seconds without a heartbeat.
+--
+-- Viewer files in INTERVAL_DIR contain "<timestamp> <seconds>". The fastest
+-- fresh request sets the interval, bounded by 1 and COLLECT_INTERVAL.
+
+math.randomseed(math.floor(os.time() + os.clock() * 1000))
+
+local collector = require "luci.client_monitor_pkg.collector"
+
+local nixio_ok, nixio = pcall(require, "nixio")
+local nixio_fs = nixio_ok and nixio.fs or nil
+local has_jsonc, jsonc = pcall(require, "luci.jsonc")
+
+local function perror(msg)
+  io.stderr:write(tostring(msg) .. "\n")
+end
+
+-- Runtime files and timing
+local DATA_FILE       = "/tmp/client_monitor/data.json"
+local HEARTBEAT_FILE  = "/tmp/client_monitor/heartbeat"
+local PID_FILE        = "/tmp/client_monitor/daemon.pid"
+local FORCE_FILE      = "/tmp/client_monitor/.force_refresh"
+local FORCE_PROCESSING_FILE = "/tmp/client_monitor/.force_refresh.processing"
+local IDLE_TIMEOUT    = 60
+local COLLECT_INTERVAL = 2
+local IDLE_CHECK_INTERVAL = 10
+local INTERVAL_DIR    = "/tmp/client_monitor/intervals"
+local INTERVAL_STALE  = 15  -- expire viewers that stopped polling
+local active_refresh_id = nil
+
+-- Runtime helpers
+local function log(msg)
+  perror("client_monitor_collect: " .. msg)
+end
+
+local function get_pid()
+  if nixio_ok and nixio.getpid then
+    return nixio.getpid()
+  end
+  local link = nixio_fs and nixio_fs.readlink and nixio_fs.readlink("/proc/self")
+  if link then
+    return tonumber(link:match("(%d+)")) or 0
+  end
+  return 0
+end
+
+local function write_pid()
+  local pid = get_pid()
+  if pid == 0 then
+    log("WARNING: could not determine PID")
+    return
+  end
+  local f = io.open(PID_FILE, "w")
+  if f then f:write(tostring(pid)); f:close() end
+end
+
+local function remove_pid()
+  os.remove(PID_FILE)
+end
+
+local function read_heartbeat()
+  local f = io.open(HEARTBEAT_FILE, "r")
+  if not f then return 0 end
+  local ts = tonumber(f:read("*a")) or 0
+  f:close()
+  return ts
+end
+
+local function read_file(path)
+  local f = io.open(path, "r")
+  if not f then return nil end
+  local content = f:read("*a")
+  f:close()
+  return content
+end
+
+local function stamp_refresh(data)
+  if data and active_refresh_id then data._refresh_id = active_refresh_id end
+  return data
+end
+
+local function take_refresh_request()
+  -- Rename before reading so a newer request stays queued for the next pass.
+  if os.rename(FORCE_FILE, FORCE_PROCESSING_FILE) then
+    local refresh_id = read_file(FORCE_PROCESSING_FILE)
+    os.remove(FORCE_PROCESSING_FILE)
+    return refresh_id
+  end
+
+  -- Pick up a request left behind by a killed daemon.
+  local refresh_id = read_file(FORCE_PROCESSING_FILE)
+  if refresh_id then os.remove(FORCE_PROCESSING_FILE) end
+  return refresh_id
+end
+
+local function atomic_write(path, content)
+  local tmp = path .. ".tmp." .. tostring(os.time()) .. "." .. tostring(math.random(100000, 999999)) .. "." .. tostring(os.clock() * 1000 % 1000000)
+  local f = io.open(tmp, "w")
+  if not f then return false end
+  f:write(content)
+  f:close()
+  if not os.rename(tmp, path) then
+    os.remove(tmp)
+    return false
+  end
+  return true
+end
+
+local function list_interval_files()
+  local names = {}
+  if nixio_fs and nixio_fs.dir then
+    local ok, iter = pcall(nixio_fs.dir, INTERVAL_DIR)
+    if ok and iter then
+      for name in iter do
+        if name ~= "." and name ~= ".." then names[#names + 1] = name end
+      end
+    end
+  else
+    local h = io.popen("ls " .. INTERVAL_DIR .. " 2>/dev/null")
+    if h then
+      for name in h:lines() do names[#names + 1] = name end
+      h:close()
+    end
+  end
+  return names
+end
+
+-- Honor the fastest active viewer and remove expired requests.
+local function effective_interval(now)
+  local min_iv = COLLECT_INTERVAL
+  for _, name in ipairs(list_interval_files()) do
+    local path = INTERVAL_DIR .. "/" .. name
+    local f = io.open(path, "r")
+    if f then
+      local content = f:read("*a") or ""
+      f:close()
+      local ts, iv = content:match("^(%d+)%s+(%d+)")
+      ts, iv = tonumber(ts), tonumber(iv)
+      if ts and iv then
+        if now - ts > INTERVAL_STALE then
+          os.remove(path)
+        elseif iv < min_iv then
+          min_iv = math.max(1, iv)
+        end
+      end
+    end
+  end
+  return min_iv
+end
+
+local function sleep(seconds)
+  if nixio_ok and nixio.nanosleep then
+    local sec = math.floor(seconds)
+    local nsec = math.floor((seconds - sec) * 1e9)
+    nixio.nanosleep(sec, nsec)
+  else
+    -- BusyBox sleep accepts fractions and avoids a busy loop without nixio.
+    os.execute("sleep " .. tostring(seconds))
+  end
+end
+
+-- Startup
+
+if nixio_fs and nixio_fs.mkdir then
+  nixio_fs.mkdir("/tmp/client_monitor")
+else
+  os.execute("mkdir -p /tmp/client_monitor")
+end
+
+write_pid()
+log("daemon started (pid file: " .. PID_FILE .. ")")
+
+if not collector.init() then
+  log("FATAL: cannot connect to ubus — writing error and exiting")
+  atomic_write(DATA_FILE, '{"error":"ubus daemon unavailable"}')
+  remove_pid()
+  os.exit(1)
+end
+
+-- Publish the first snapshot right away.
+local ok, data = pcall(collector.collect, true)
+if ok and data then
+  stamp_refresh(data)
+  local json = has_jsonc and jsonc.stringify(data) or "{}"
+  atomic_write(DATA_FILE, json)
+  log("initial fast collection complete")
+else
+  log("WARNING: initial collection failed: " .. tostring(data))
+  atomic_write(DATA_FILE, '{"error":"initial collection failed"}')
+end
+
+-- Take another sample after one second to establish rate deltas.
+sleep(1)
+ok, data = pcall(collector.collect, true)
+if ok and data then
+  stamp_refresh(data)
+  local json = has_jsonc and jsonc.stringify(data) or "{}"
+  atomic_write(DATA_FILE, json)
+end
+
+-- Collection loop
+local fast_polls = 0
+local prev_idle = 999
+
+while true do
+  local now = os.time()
+  local last_poll = read_heartbeat()
+  local idle = now - last_poll
+
+  if last_poll > 0 and idle > IDLE_TIMEOUT then
+    -- Drop the PID file, then give a new viewer one second to renew the heartbeat.
+    -- The daemon lock prevents a second collector during this handoff.
+    remove_pid()
+    sleep(1)
+    local renewed_poll = read_heartbeat()
+    local renewed_idle = os.time() - renewed_poll
+    if renewed_poll > 0 and renewed_idle <= IDLE_TIMEOUT then
+      write_pid()
+      last_poll = renewed_poll
+      idle = renewed_idle
+      prev_idle = idle
+      fast_polls = 5
+      log("idle exit cancelled by a new viewer")
+    else
+      log("idle timeout (" .. renewed_idle .. "s > " .. IDLE_TIMEOUT .. "s) — exiting")
+      break
+    end
+  end
+
+  if last_poll > 0 and idle <= 2 and prev_idle > 10 then
+    fast_polls = 5
+  end
+  prev_idle = idle
+
+  local refresh_id = take_refresh_request()
+  if refresh_id then
+    if refresh_id and refresh_id ~= "" then active_refresh_id = refresh_id end
+    collector.clear_cache()
+    log("cache cleared (force refresh)")
+  end
+
+  ok, data = pcall(collector.collect)
+  if ok and data then
+    stamp_refresh(data)
+    local json = has_jsonc and jsonc.stringify(data) or "{}"
+    atomic_write(DATA_FILE, json)
+  else
+    log("ERROR: collection failed: " .. tostring(data))
+  end
+
+  if last_poll > 0 and idle > 10 then
+    for _ = 1, IDLE_CHECK_INTERVAL do
+      sleep(1)
+      if os.time() - read_heartbeat() <= 2 then break end
+    end
+  elseif fast_polls > 0 then
+    sleep(1)
+    fast_polls = fast_polls - 1
+  else
+    -- Sleep in one-second steps so a new fast viewer can shorten the wait.
+    local target = effective_interval(os.time())
+    local slept = 0
+    while slept < target do
+      sleep(1)
+      slept = slept + 1
+      if slept < target then
+        local new_target = effective_interval(os.time())
+        if new_target < target then target = new_target end
+      end
+    end
+  end
+end
+
+collector.close()
+remove_pid()
+log("daemon stopped")
