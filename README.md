@@ -12,7 +12,7 @@ Real-time client traffic monitoring for OpenWrt LuCI. Live per-client Rx/Tx rate
 
 ```bash
 apk update && \
-wget --no-check-certificate -O /tmp/luci-app-client-monitor.apk "https://github.com/OppsError404/luci-app-client-monitor/releases/download/v1.0.0-r2/luci-app-client-monitor-1.0.0-r2.apk" && \
+wget --no-check-certificate -O /tmp/luci-app-client-monitor.apk "https://github.com/OppsError404/luci-app-client-monitor/releases/download/v1.0.0-r3/luci-app-client-monitor-1.0.0-r3.apk" && \
 apk add --allow-untrusted /tmp/luci-app-client-monitor.apk && \
 rm -f /tmp/luci-app-client-monitor.apk
 ```
@@ -21,7 +21,7 @@ rm -f /tmp/luci-app-client-monitor.apk
 
 ```bash
 opkg update && \
-wget --no-check-certificate -O /tmp/luci-app-client-monitor.ipk "https://github.com/OppsError404/luci-app-client-monitor/releases/download/v1.0.0-r2/luci-app-client-monitor_1.0.0-r2.ipk" && \
+wget --no-check-certificate -O /tmp/luci-app-client-monitor.ipk "https://github.com/OppsError404/luci-app-client-monitor/releases/download/v1.0.0-r3/luci-app-client-monitor_1.0.0-r3.ipk" && \
 opkg install /tmp/luci-app-client-monitor.ipk && \
 rm -f /tmp/luci-app-client-monitor.ipk
 ```
@@ -146,16 +146,8 @@ echo 1 > /tmp/client_monitor/.force_refresh
 | `luci-base` | LuCI framework |
 | `lua` | Lua runtime (5.1 or 5.4) |
 | `luci-lib-nixio` | Filesystem, sleep, syslog |
-| `luci-lib-base` | LuCI base libraries |
 | `libubus-lua` | ubus Lua API |
 | `libuci-lua` | UCI configuration API |
-
-### System
-
-| Package | Notes |
-|---------|-------|
-| `nftables` | Kernel bridge-family support for per-MAC counting |
-| `ip-bridge` | `bridge fdb show` for FDB table access |
 
 ---
 
@@ -170,7 +162,6 @@ echo 1 > /tmp/client_monitor/.force_refresh
 
 ## Notes
 
-- Requires a kernel with **nftables bridge family** support (standard on OpenWrt 23+).
 - The collector daemon is **on-demand only** — it starts when a browser opens the page and stops after 60 s of no polling.
 - All cache files live in `/tmp` and reset on reboot. The registry persists client identities but is rebuilt from scratch if deleted.
 - Static assets (JS/CSS) are shipped gzip-compressed and decompressed to `/tmp` at boot to minimize flash storage.
